@@ -1,0 +1,112 @@
+---
+import { site, nav } from '@/data/site';
+import Icon from '@/components/ui/Icon.astro';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer theme-dark">
+  <div class="container inner">
+    <p class="wordmark" aria-hidden="true">{site.name}</p>
+
+    <div class="cols">
+      <div>
+        <p class="muted">Cuidado masculino</p>
+        <address>
+          {site.address.street}, {site.address.district}<br />
+          {site.address.city}, Perú
+        </address>
+      </div>
+
+      <nav aria-label="Pie de página">
+        <ul>
+          {nav.map((item) => (
+            <li><a href={item.href}>{item.label}</a></li>
+          ))}
+        </ul>
+      </nav>
+
+      <div class="social">
+        <a href={site.instagram.url} class="icon-link">
+          <Icon name="instagram" /> {site.instagram.handle}
+        </a>
+        <a href={site.bookingUrl} class="icon-link">
+          <Icon name="arrow-up-right" /> Reservar en Fresha
+        </a>
+      </div>
+    </div>
+
+    <p class="legal">© {year} {site.name}. Todos los derechos reservados.</p>
+  </div>
+</footer>
+
+<style lang="scss">
+  @use '@/styles/mixins' as *;
+
+  .site-footer {
+    padding-block: var(--section-pad) calc(var(--s-10) + env(safe-area-inset-bottom));
+
+    /* El espacio extra abajo es para la barra fija, que solo existe en móvil */
+    @include up('md') {
+      padding-bottom: var(--s-7);
+    }
+  }
+
+  .inner {
+    display: grid;
+    gap: var(--s-7);
+    container-type: inline-size;
+  }
+
+  .wordmark {
+    font-family: var(--font-brand);
+    font-size: min(clamp(1.9rem, 0.4rem + 7.4vw, 7.5rem), 10cqi);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    line-height: 1;
+    white-space: nowrap;
+    color: var(--c-white);
+  }
+
+  .cols {
+    display: grid;
+    gap: var(--s-6);
+
+    @include up('md') {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  .muted {
+    color: var(--muted);
+    margin-bottom: var(--s-2);
+  }
+
+  address {
+    font-style: normal;
+  }
+
+  ul {
+    @include reset-list;
+    display: grid;
+    gap: var(--s-1);
+  }
+
+  nav a,
+  .icon-link {
+    @include icon-link;
+    @include underline-on-hover;
+  }
+
+  .social {
+    display: grid;
+    align-content: start;
+  }
+
+  .legal {
+    padding-top: var(--s-5);
+    border-top: 1px solid var(--rule);
+    font-size: 0.8125rem;
+    color: var(--muted);
+  }
+</style>

@@ -1,0 +1,184 @@
+---
+import { site } from '@/data/site';
+import Stars from '@/components/ui/Stars.astro';
+import Button from '@/components/ui/Button.astro';
+import LoopVideo from '@/components/ui/LoopVideo.astro';
+---
+
+<section id="top" class="hero theme-dark" aria-labelledby="hero-title">
+  <div class="media">
+    <!-- Vertical para celular y tablet en vertical; horizontal para pantallas apaisadas.
+         El que está oculto no se descarga: LoopVideo solo carga lo que está en pantalla. -->
+    <LoopVideo src="/video/hero" poster="/video/hero-poster.jpg" class="hero-portrait" />
+    <LoopVideo src="/video/hero-wide" poster="/video/hero-wide-poster.jpg" class="hero-wide" />
+    <div class="scrim" aria-hidden="true"></div>
+  </div>
+
+  <div class="content container">
+    <p class="place">Barbería en {site.address.district}, {site.address.city}</p>
+
+    <h1 id="hero-title" class="title">
+      <span class="line"><span>Elevamos</span></span>
+      <span class="line"><span>el concepto</span></span>
+      <span class="line"><span>de barbería</span></span>
+    </h1>
+
+    <a class="rating" href={site.reviewsUrl}>
+      <Stars size={14} />
+      <span>
+        <strong>{site.rating.value}</strong> de 5 en {site.rating.count} reseñas de {site.rating.source}
+      </span>
+    </a>
+
+    <div class="ctas">
+      <Button href={site.bookingUrl} variant="inverse" size="lg" data-book>Reservar cita</Button>
+      <Button href="#servicios" variant="link">Ver servicios y precios</Button>
+    </div>
+  </div>
+</section>
+
+<style lang="scss">
+  @use '@/styles/mixins' as *;
+
+  .hero {
+    position: relative;
+    display: grid;
+    min-height: 100svh;
+    overflow: hidden;
+
+    @include up('lg') {
+      min-height: min(100svh, 60rem);
+    }
+  }
+
+  /* Video a pantalla completa detrás del texto (móvil y escritorio, como el canvas) */
+  .media {
+    position: absolute;
+    inset: 0;
+
+    :global(video) {
+      @include mono;
+    }
+
+    @include up('lg') {
+      :global(.hero-portrait) {
+        object-position: center 30%;
+      }
+    }
+
+    :global(.hero-wide) {
+      display: none;
+    }
+
+    @media (min-width: 48rem) and (orientation: landscape) {
+      :global(.hero-portrait) {
+        display: none;
+      }
+      :global(.hero-wide) {
+        display: block;
+      }
+    }
+  }
+
+  .scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, ink(0.55) 0%, ink(0) 22%, ink(0.05) 42%, ink(0.9) 82%);
+
+    @include up('lg') {
+      /* Oscurece arriba (menú) y abajo-izquierda (titular) */
+      background:
+        linear-gradient(180deg, ink(0.6) 0%, ink(0) 20%, ink(0.15) 50%, ink(0.9) 100%),
+        linear-gradient(90deg, ink(0.45) 0%, ink(0) 60%);
+    }
+  }
+
+  .content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: var(--s-5);
+    container-type: inline-size;
+    padding-top: calc(var(--header-h) + var(--s-6));
+    padding-bottom: calc(5.5rem + env(safe-area-inset-bottom));
+
+    /* Desde tablet no hay barra fija abajo */
+    @include up('md') {
+      padding-bottom: var(--s-8);
+    }
+
+    @include up('lg') {
+      padding-bottom: var(--s-9);
+      gap: var(--s-6);
+    }
+  }
+
+  .place {
+    @include kicker;
+    color: var(--c-concrete);
+  }
+
+  .title {
+    /* Nunca más ancho que su columna: la línea más larga mide ~9,3 em */
+    @include display(xl, $fit: 10.4cqi);
+
+    .line {
+      display: block;
+      overflow: hidden;
+      white-space: nowrap;
+      padding-bottom: 0.04em;
+    }
+
+    .line > span {
+      display: inline-block;
+      animation: rise 0.9s var(--ease-out) both;
+    }
+
+    .line:nth-child(2) > span {
+      animation-delay: 0.08s;
+    }
+    .line:nth-child(3) > span {
+      animation-delay: 0.16s;
+    }
+  }
+
+  .rating {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--s-2) var(--s-3);
+    align-self: flex-start;
+    min-height: var(--tap);
+    font-size: 0.9375rem;
+    text-decoration: none;
+    animation: fade 0.8s 0.45s var(--ease-out) both;
+
+    &:hover span:last-child {
+      text-decoration: underline;
+      text-underline-offset: 0.3em;
+    }
+  }
+
+  .ctas {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s-3) var(--s-5);
+    animation: fade 0.8s 0.55s var(--ease-out) both;
+  }
+
+  @keyframes rise {
+    from {
+      transform: translateY(105%);
+    }
+  }
+
+  @keyframes fade {
+    from {
+      opacity: 0;
+      transform: translateY(0.5rem);
+    }
+  }
+</style>

@@ -1,0 +1,22 @@
+---
+import Icon from './Icon.astro';
+
+interface Props {
+  size?: number;
+  /** separación entre estrellas, en px */
+  gap?: number;
+  count?: number;
+}
+
+const { size = 14, gap = 2, count = 5 } = Astro.props;
+---
+
+<span class="stars" style={`gap: ${gap}px`} aria-hidden="true">
+  {Array.from({ length: count }, () => <Icon name="star" size={size} />)}
+</span>
+
+<style>
+  .stars {
+    display: inline-flex;
+  }
+</style>

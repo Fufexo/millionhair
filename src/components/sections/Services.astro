@@ -1,0 +1,167 @@
+---
+import { services, totalServicesOnFresha } from '@/data/services';
+import { formatDuration, formatPrice } from '@/lib/format';
+import { site } from '@/data/site';
+import SectionHeader from '@/components/ui/SectionHeader.astro';
+import Button from '@/components/ui/Button.astro';
+import Icon from '@/components/ui/Icon.astro';
+---
+
+<section id="servicios" class="services theme-light" aria-labelledby="servicios-title">
+  <div class="container grid">
+    <div class="intro">
+      <SectionHeader kicker="Servicios" title="Elige tu corte" id="servicios-title">
+        <p class="lede">Precios en soles. Reservas en Fresha con confirmación al instante.</p>
+      </SectionHeader>
+      <Button href={site.bookingUrl} variant="outline" class="all-desktop">
+        Ver los {totalServicesOnFresha} servicios
+      </Button>
+    </div>
+
+    <ul class="list" role="list">
+      {services.map((s) => (
+        <li>
+          <a href={s.bookingUrl} class="row">
+            <span class="name">
+              {s.name}
+              <span class="meta">
+                {formatDuration(s.duration)}
+                {s.note && <> · {s.note}</>}
+              </span>
+            </span>
+            <span class="price">{formatPrice(s.price)}</span>
+            <Icon name="arrow-up-right" size={18} class="arrow" />
+            <span class="sr-only">, reservar en Fresha</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+
+    <Button href={site.bookingUrl} variant="outline" block class="all-mobile">
+      Ver los {totalServicesOnFresha} servicios
+    </Button>
+  </div>
+</section>
+
+<style lang="scss">
+  @use '@/styles/mixins' as *;
+
+  .services {
+    padding-block: var(--section-pad);
+  }
+
+  .grid {
+    display: grid;
+    gap: var(--s-6);
+
+    @include up('lg') {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      gap: var(--s-9);
+      align-items: start;
+    }
+  }
+
+  .intro {
+    display: grid;
+    gap: var(--s-6);
+    justify-items: start;
+
+    @include up('lg') {
+      position: sticky;
+      top: calc(var(--header-h) + var(--s-6));
+    }
+  }
+
+  .lede {
+    max-width: 34ch;
+    color: var(--muted);
+  }
+
+  .list {
+    @include reset-list;
+  }
+
+  /* Solo separadores entre filas: sin raya arriba de la primera ni abajo de la última */
+  li + li {
+    border-top: 1px solid var(--rule);
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: var(--s-4);
+    min-height: 4.75rem;
+    padding-block: var(--s-4);
+    text-decoration: none;
+    transition:
+      background-color 0.25s var(--ease-out),
+      box-shadow 0.25s var(--ease-out);
+
+    @include up('lg') {
+      min-height: 5.5rem;
+    }
+
+    /* El fondo se extiende 1rem a cada lado con box-shadow: el texto no se mueve */
+    @media (hover: hover) {
+      &:hover {
+        background: var(--c-paper-dim);
+        box-shadow:
+          -1rem 0 0 var(--c-paper-dim),
+          1rem 0 0 var(--c-paper-dim);
+      }
+    }
+
+    &:focus-visible {
+      outline-offset: 4px;
+    }
+
+    &:hover :global(.arrow) {
+      transform: translate(2px, -2px);
+    }
+  }
+
+  .name {
+    display: grid;
+    gap: var(--s-1);
+    font-size: 1.0625rem;
+    font-weight: 600;
+
+    @include up('lg') {
+      font-size: 1.25rem;
+    }
+  }
+
+  .meta {
+    font-size: 0.8125rem;
+    font-weight: 400;
+    color: var(--muted);
+  }
+
+  .price {
+    font-size: 1.0625rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+
+    @include up('lg') {
+      font-size: 1.25rem;
+    }
+  }
+
+  .row :global(.arrow) {
+    transition: transform 0.2s var(--ease-out);
+  }
+
+  .intro :global(.all-desktop) {
+    display: none;
+    @include up('lg') {
+      display: inline-flex;
+    }
+  }
+
+  .grid > :global(.all-mobile) {
+    @include up('lg') {
+      display: none;
+    }
+  }
+</style>

@@ -1,0 +1,59 @@
+---
+/**
+ * Video decorativo en loop, sin audio. Se reproduce solo cuando está en
+ * pantalla y se queda en el póster si el usuario prefiere menos movimiento.
+ */
+interface Props {
+  src: string; // ruta base sin extensión, p. ej. "/video/hero"
+  poster: string;
+  label?: string; // si el video aporta información, describe qué muestra
+  class?: string;
+  eager?: boolean;
+}
+
+const { src, poster, label, class: className, eager = false } = Astro.props;
+---
+
+<video
+  class:list={['loop-video', className]}
+  data-loop-video
+  muted
+  loop
+  playsinline
+  preload={eager ? 'auto' : 'none'}
+  poster={poster}
+  aria-hidden={label ? undefined : 'true'}
+  aria-label={label}
+>
+  <source src={`${src}.webm`} type="video/webm" />
+  <source src={`${src}.mp4`} type="video/mp4" />
+</video>
+
+<style>
+  .loop-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background: var(--c-graphite);
+  }
+</style>
+
+<script>
+  import { onReducedMotion, playMuted } from '@/lib/motion';
+
+  const videos = document.querySelectorAll<HTMLVideoElement>('video[data-loop-video]');
+
+  const io = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        const video = entry.target as HTMLVideoElement;
+        if (entry.isIntersecting) playMuted(video);
+        else video.pause();
+      }
+    },
+    { rootMargin: '200px 0px' },
+  );
+
+  videos.forEach((v) => io.observe(v));
+  onReducedMotion(() => videos.forEach((v) => v.pause()));
+</script>

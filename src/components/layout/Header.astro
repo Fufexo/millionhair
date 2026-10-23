@@ -1,0 +1,276 @@
+---
+import { nav, site } from '@/data/site';
+import Icon from '@/components/ui/Icon.astro';
+import Button from '@/components/ui/Button.astro';
+---
+
+<header class="site-header" data-header data-state="top">
+  <div class="bar container">
+    <a href="#top" class="wordmark" aria-label={`${site.name}, ir al inicio`}>{site.name}</a>
+
+    <nav class="nav-desktop" aria-label="Principal">
+      <ul>
+        {nav.map((item) => (
+          <li><a href={item.href}>{item.label}</a></li>
+        ))}
+      </ul>
+    </nav>
+
+    <div class="actions">
+      <Button href={site.bookingUrl} variant="inverse" class="book-desktop" data-book>Reservar</Button>
+      <button
+        type="button"
+        class="menu-toggle"
+        aria-expanded="false"
+        aria-controls="menu-movil"
+        data-menu-toggle
+      >
+        <span class="sr-only" data-menu-label>Abrir menú</span>
+        <Icon name="menu" size={24} class="i-open" />
+        <Icon name="close" size={24} class="i-close" />
+      </button>
+    </div>
+  </div>
+
+  <div id="menu-movil" class="menu-mobile theme-dark" data-menu hidden>
+    <nav aria-label="Menú móvil" class="container">
+      <ul>
+        {nav.map((item) => (
+          <li><a href={item.href} data-menu-link>{item.label}</a></li>
+        ))}
+      </ul>
+      <div class="menu-foot">
+        <Button href={site.bookingUrl} variant="inverse" block size="lg" data-book>Reservar cita</Button>
+        <a class="menu-ig" href={site.instagram.url}>
+          <Icon name="instagram" /> {site.instagram.handle}
+        </a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<style lang="scss">
+  @use '@/styles/mixins' as *;
+
+  .site-header {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 50;
+    color: var(--c-white);
+    transition:
+      background-color 0.3s var(--ease-out),
+      border-color 0.3s var(--ease-out);
+    border-bottom: 1px solid transparent;
+
+    /* El fondo va en un pseudo-elemento: un backdrop-filter en el header
+       convertiría al header en el contenedor del menú fijo y lo recortaría. */
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      background: ink(0.92);
+      backdrop-filter: blur(10px);
+      opacity: 0;
+      transition: opacity 0.3s var(--ease-out);
+    }
+
+    &[data-state='scrolled'],
+    &:has([data-menu]:not([hidden])) {
+      border-bottom-color: var(--c-line-dark);
+
+      &::before {
+        opacity: 1;
+      }
+    }
+  }
+
+  .bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s-5);
+    height: var(--header-h);
+  }
+
+  .wordmark {
+    font-family: var(--font-brand);
+    font-size: 0.9375rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    text-decoration: none;
+    white-space: nowrap;
+
+    @include up('lg') {
+      font-size: 1.0625rem;
+    }
+  }
+
+  .nav-desktop {
+    display: none;
+
+    @include up('lg') {
+      display: block;
+    }
+
+    ul {
+      @include reset-list;
+      display: flex;
+      gap: var(--s-6);
+    }
+
+    a {
+      font-size: 0.9375rem;
+      text-decoration: none;
+      opacity: 0.85;
+      padding-block: var(--s-2);
+      background: linear-gradient(currentColor, currentColor) left bottom / 0 1px no-repeat;
+      transition:
+        opacity 0.2s,
+        background-size 0.25s var(--ease-out);
+
+      &:hover {
+        opacity: 1;
+        background-size: 100% 1px;
+      }
+    }
+  }
+
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: var(--s-2);
+  }
+
+  .actions :global(.book-desktop) {
+    display: none;
+    min-height: var(--tap);
+    padding-inline: 1.25rem;
+
+    /* Desde tablet el botón vive en el menú (la barra fija es solo móvil) */
+    @include up('md') {
+      display: inline-flex;
+    }
+  }
+
+  .menu-toggle {
+    display: grid;
+    place-items: center;
+    width: var(--tap);
+    height: var(--tap);
+    margin-right: -0.625rem;
+    border: 0;
+    background: none;
+    cursor: pointer;
+
+    @include up('lg') {
+      display: none;
+    }
+
+    :global(.i-close) {
+      display: none;
+    }
+
+    &[aria-expanded='true'] {
+      :global(.i-open) {
+        display: none;
+      }
+      :global(.i-close) {
+        display: block;
+      }
+    }
+  }
+
+  .menu-mobile {
+    position: fixed;
+    inset: var(--header-h) 0 0;
+    overflow-y: auto;
+    padding-block: var(--s-6) calc(var(--s-6) + env(safe-area-inset-bottom));
+
+    &:not([hidden]) {
+      animation: menu-in 0.28s var(--ease-out);
+    }
+
+    nav {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 100%;
+      gap: var(--s-7);
+    }
+
+    ul {
+      @include reset-list;
+    }
+
+    li + li {
+      border-top: 1px solid var(--rule);
+    }
+
+    li a {
+      @include display(md);
+      display: block;
+      padding-block: var(--s-4);
+      text-decoration: none;
+    }
+  }
+
+  .menu-foot {
+    display: grid;
+    gap: var(--s-4);
+  }
+
+  .menu-ig {
+    @include icon-link;
+    color: var(--muted);
+  }
+
+  @keyframes menu-in {
+    from {
+      opacity: 0;
+      transform: translateY(-0.5rem);
+    }
+  }
+</style>
+
+<script>
+  const header = document.querySelector<HTMLElement>('[data-header]');
+  const toggle = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
+  const menu = document.querySelector<HTMLElement>('[data-menu]');
+  const label = document.querySelector<HTMLElement>('[data-menu-label]');
+
+  // El header se vuelve opaco cuando el hero (#top) termina de pasar por debajo
+  const sentinel = document.getElementById('top');
+  if (header && sentinel) {
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        header.dataset.state = entry.isIntersecting ? 'top' : 'scrolled';
+      },
+      { rootMargin: `-${header.offsetHeight}px 0px 0px 0px`, threshold: 0 },
+    );
+    io.observe(sentinel);
+  }
+
+  if (toggle && menu && label) {
+    const setOpen = (open: boolean) => {
+      toggle.setAttribute('aria-expanded', String(open));
+      label.textContent = open ? 'Cerrar menú' : 'Abrir menú';
+      menu.hidden = !open;
+      document.documentElement.style.overflow = open ? 'hidden' : '';
+      document.body.dataset.menuOpen = String(open);
+    };
+
+    toggle.addEventListener('click', () => setOpen(toggle.getAttribute('aria-expanded') !== 'true'));
+    menu.querySelectorAll('[data-menu-link]').forEach((a) => a.addEventListener('click', () => setOpen(false)));
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !menu.hidden) {
+        setOpen(false);
+        toggle.focus();
+      }
+    });
+    // Desde 'lg' (64rem) el menú móvil no existe: se cierra si estaba abierto
+    window.matchMedia('(min-width: 64rem)').addEventListener('change', (e) => {
+      if (e.matches) setOpen(false);
+    });
+  }
+</script>

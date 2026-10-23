@@ -1,0 +1,138 @@
+@use 'tokens' as *;
+@use 'mixins' as *;
+
+:root {
+  @each $name, $value in $colors {
+    --c-#{$name}: #{$value};
+  }
+  @each $name, $value in $fonts {
+    --font-#{$name}: #{$value};
+  }
+  @each $name, $value in $space {
+    --s-#{$name}: #{$value};
+  }
+  --header-h: #{$header-h};
+  --tap: #{$tap};
+  --ease-out: #{$ease-out};
+  --section-pad: clamp(3.5rem, 2.5rem + 4vw, 7.5rem);
+
+  color-scheme: light;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-behavior: smooth;
+  scroll-padding-top: var(--header-h);
+}
+
+body {
+  margin: 0;
+  min-height: 100svh;
+  background: var(--c-paper);
+  color: var(--c-ink);
+  font-family: var(--font-base);
+  font-size: 1rem;
+  line-height: 1.55;
+  font-optical-sizing: auto;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+img,
+video,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+img,
+video {
+  height: auto;
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+h1,
+h2,
+h3,
+p,
+figure,
+blockquote {
+  margin: 0;
+}
+
+:focus-visible {
+  @include focus-ring;
+}
+
+::selection {
+  background: var(--c-ink);
+  color: var(--c-white);
+}
+
+.container {
+  @include container;
+}
+
+.sr-only {
+  @include visually-hidden;
+}
+
+.skip-link {
+  position: fixed;
+  top: var(--s-2);
+  left: var(--s-2);
+  z-index: 100;
+  padding: var(--s-3) var(--s-4);
+  background: var(--c-white);
+  color: var(--c-ink);
+  font-weight: 600;
+  transform: translateY(-200%);
+  transition: transform 0.2s var(--ease-out);
+
+  &:focus-visible {
+    transform: none;
+  }
+}
+
+/* Secciones oscuras: cambian los tokens de su contenido */
+.theme-dark {
+  background: var(--c-ink);
+  color: var(--c-white);
+  --kicker-color: var(--c-mist);
+  --muted: var(--c-mist);
+  --rule: var(--c-line-dark);
+  color-scheme: dark;
+}
+
+.theme-light {
+  --muted: var(--c-stone);
+  --rule: var(--c-line);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

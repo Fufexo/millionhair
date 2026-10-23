@@ -1,0 +1,30 @@
+---
+/**
+ * Texto "Abierto hoy hasta las 21:00" / "Cerrado · abrimos mañana…".
+ * Sin JS muestra el horario resumido; en el navegador se calcula con la hora
+ * de Lima y se refresca cada minuto. Se puede usar varias veces por página.
+ */
+import { hoursSummary } from '@/lib/hours';
+
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+<span class={className} data-open-status>{hoursSummary()}</span>
+
+<script>
+  import { getOpenStatus } from '@/lib/hours';
+
+  const update = () => {
+    const status = getOpenStatus();
+    document.querySelectorAll<HTMLElement>('[data-open-status]').forEach((el) => {
+      el.textContent = status.label;
+      el.dataset.open = String(status.open);
+    });
+  };
+  update();
+  setInterval(update, 60_000);
+</script>

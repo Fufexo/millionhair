@@ -1,0 +1,190 @@
+---
+import { Image } from 'astro:assets';
+import { looks } from '@/data/lookbook';
+import { site } from '@/data/site';
+import SectionHeader from '@/components/ui/SectionHeader.astro';
+import Icon from '@/components/ui/Icon.astro';
+---
+
+<section id="lookbook" class="lookbook" aria-labelledby="lookbook-title">
+  <div class="container head">
+    <SectionHeader kicker="Lookbook" title="Perfiles" id="lookbook-title" />
+    <div class="tools">
+      <a class="ig" href={site.instagram.url}>Más en {site.instagram.handle}</a>
+      <div class="arrows">
+        <button type="button" class="arrow" aria-label="Cortes anteriores" aria-controls="lookbook-strip" data-strip-prev>
+          <Icon name="chevron-left" size={20} />
+        </button>
+        <button type="button" class="arrow" aria-label="Cortes siguientes" aria-controls="lookbook-strip" data-strip-next>
+          <Icon name="chevron-right" size={20} />
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <ul id="lookbook-strip" class="strip" role="list" tabindex="0" aria-label="Cortes recientes, desplazable horizontalmente" data-strip>
+      {looks.map((look, i) => (
+        <li>
+          <figure>
+            <Image
+              src={look.image}
+              alt={look.alt}
+              widths={[320, 480, 720]}
+              sizes="(min-width: 1024px) 22vw, (min-width: 768px) 30vw, 72vw"
+              loading={i < 2 ? 'eager' : 'lazy'}
+            />
+            <figcaption>{look.name}</figcaption>
+          </figure>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style lang="scss">
+  @use '@/styles/mixins' as *;
+
+  .lookbook {
+    padding-block: var(--section-pad);
+    background: var(--c-concrete);
+    --kicker-color: var(--c-smoke);
+  }
+
+  .head {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: var(--s-4);
+    margin-bottom: var(--s-6);
+  }
+
+  .ig {
+    min-height: var(--tap);
+    display: inline-flex;
+    align-items: center;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    text-underline-offset: 0.3em;
+    white-space: nowrap;
+  }
+
+  .tools {
+    display: flex;
+    align-items: center;
+    gap: var(--s-5);
+  }
+
+  /* Flechas desde tablet; en móvil se desliza con el dedo */
+  .arrows {
+    display: none;
+    gap: var(--s-2);
+
+    @include up('md') {
+      display: flex;
+    }
+  }
+
+  .arrow {
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    padding: 0;
+    border: 1px solid var(--c-ink);
+    background: transparent;
+    color: var(--c-ink);
+    cursor: pointer;
+    transition:
+      background-color 0.2s var(--ease-out),
+      color 0.2s var(--ease-out);
+
+    &:hover {
+      background: var(--c-ink);
+      color: var(--c-white);
+    }
+  }
+
+  /* Carrusel dentro del contenedor: 1,4 cortes en móvil, 3 en tablet, 4 en escritorio */
+  .strip {
+    @include reset-list;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 72%;
+    gap: var(--s-3);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    @include up('md') {
+      grid-auto-columns: calc((100% - var(--s-5) * 2) / 3);
+      gap: var(--s-5);
+    }
+
+    @include up('lg') {
+      grid-auto-columns: calc((100% - var(--s-5) * 3) / 4);
+    }
+
+    &:focus-visible {
+      outline-offset: 4px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .strip {
+      scroll-behavior: auto;
+    }
+  }
+
+  li {
+    scroll-snap-align: start;
+  }
+
+  figure {
+    display: grid;
+    gap: var(--s-3);
+  }
+
+  figure :global(img) {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    @include mono(1);
+  }
+
+  figcaption {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--c-charcoal);
+  }
+</style>
+
+<script>
+  // Flechas del carrusel: avanzan un corte; al llegar al final vuelven al inicio.
+  const strip = document.querySelector<HTMLElement>('[data-strip]');
+  const prev = document.querySelector<HTMLButtonElement>('[data-strip-prev]');
+  const next = document.querySelector<HTMLButtonElement>('[data-strip-next]');
+
+  if (strip && prev && next) {
+    const step = () => {
+      const first = strip.firstElementChild as HTMLElement | null;
+      const gap = parseFloat(getComputedStyle(strip).columnGap) || 0;
+      return (first?.getBoundingClientRect().width ?? strip.clientWidth) + gap;
+    };
+    const go = (dir: 1 | -1) => {
+      const atEnd = strip.scrollLeft + strip.clientWidth >= strip.scrollWidth - 4;
+      const atStart = strip.scrollLeft <= 4;
+      if (dir === 1 && atEnd) strip.scrollTo({ left: 0 });
+      else if (dir === -1 && atStart) strip.scrollTo({ left: strip.scrollWidth });
+      else strip.scrollBy({ left: dir * step() });
+    };
+    prev.addEventListener('click', () => go(-1));
+    next.addEventListener('click', () => go(1));
+  }
+</script>

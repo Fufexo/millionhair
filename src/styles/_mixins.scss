@@ -1,0 +1,125 @@
+@use 'sass:color';
+@use 'sass:map';
+@use 'tokens' as *;
+
+/** Negro de marca con transparencia, para velos, degradados y barras. */
+@function ink($alpha) {
+  @return color.change(map.get($colors, 'ink'), $alpha: $alpha);
+}
+
+@mixin up($bp) {
+  @media (min-width: map.get($breakpoints, $bp)) {
+    @content;
+  }
+}
+
+@mixin down($bp) {
+  @media (max-width: calc(#{map.get($breakpoints, $bp)} - 0.02rem)) {
+    @content;
+  }
+}
+
+@mixin container {
+  width: 100%;
+  max-width: $container;
+  margin-inline: auto;
+  padding-inline: $gutter;
+  @include up('md') {
+    padding-inline: $gutter-md;
+  }
+  @include up('lg') {
+    padding-inline: $gutter-lg;
+  }
+}
+
+/**
+ * Títulos de sección: Archivo expandido, mayúsculas.
+ * $fit (p. ej. 11cqi) pone un tope relativo al contenedor para que la palabra
+ * más larga nunca desborde su columna; el padre necesita container-type.
+ */
+@mixin display($size: md, $fit: null) {
+  font-family: var(--font-base);
+  font-weight: 700;
+  font-stretch: 125%;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  line-height: 1.02;
+  text-wrap: balance;
+  margin: 0;
+
+  /* Sistema visual (md): móvil 32–40 px, escritorio 56–64 px */
+  $font-size: clamp(2rem, 0.9rem + 2.9vw, 4rem);
+  @if $size == xl {
+    $font-size: clamp(2.125rem, 0.85rem + 5vw, 4.75rem);
+    line-height: 0.98;
+  } @else if $size == lg {
+    $font-size: clamp(2rem, 1.3rem + 3vw, 4rem);
+  }
+
+  @if $fit {
+    font-size: min(#{$font-size}, #{$fit});
+  } @else {
+    font-size: $font-size;
+  }
+}
+
+/** Fotos y videos en blanco y negro de marca. */
+@mixin mono($contrast: 1.05) {
+  @if $contrast == 1 {
+    filter: grayscale(1);
+  } @else {
+    filter: grayscale(1) contrast($contrast);
+  }
+}
+
+/** Enlace de texto con ícono y área táctil de 44 px. */
+@mixin icon-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  min-height: var(--tap);
+  text-decoration: none;
+}
+
+/** Subrayado solo al pasar el mouse. */
+@mixin underline-on-hover($offset: 0.3em) {
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+    text-underline-offset: $offset;
+  }
+}
+
+/** Etiqueta pequeña sobre los títulos. */
+@mixin kicker {
+  /* Sistema visual: etiqueta 12 px, mayúsculas, +0.18em */
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--kicker-color, var(--c-stone));
+}
+
+@mixin visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@mixin focus-ring($color: currentColor) {
+  outline: 2px solid $color;
+  outline-offset: 3px;
+}
+
+@mixin reset-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}

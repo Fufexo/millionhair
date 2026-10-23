@@ -1,0 +1,132 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+
+interface Props extends HTMLAttributes<'a'> {
+  href: string;
+  variant?: 'solid' | 'outline' | 'inverse' | 'link';
+  size?: 'md' | 'lg';
+  block?: boolean;
+  external?: boolean;
+}
+
+const {
+  href,
+  variant = 'solid',
+  size = 'md',
+  block = false,
+  external = false,
+  class: className,
+  ...rest
+} = Astro.props;
+
+const ext = external ? { target: '_blank', rel: 'noopener' } : {};
+---
+
+<a
+  href={href}
+  class:list={['btn', `btn--${variant}`, `btn--${size}`, { 'btn--block': block }, className]}
+  {...ext}
+  {...rest}
+>
+  <slot />
+  {external && <span class="sr-only"> (se abre en otra pestaña)</span>}
+</a>
+
+<style lang="scss">
+  .btn {
+    --btn-fg: var(--c-white);
+    --btn-bg: var(--c-ink);
+    --btn-border: var(--c-ink);
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6em;
+    min-height: 3.25rem;
+    padding: 0 1.5rem;
+    border: 1px solid var(--btn-border);
+    background: var(--btn-bg);
+    color: var(--btn-fg);
+    font-size: 0.875rem;
+    font-weight: 700;
+    font-stretch: 112%;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+      background-color 0.2s var(--ease-out),
+      color 0.2s var(--ease-out),
+      border-color 0.2s var(--ease-out);
+
+    &:focus-visible {
+      outline-offset: 3px;
+    }
+  }
+
+  .btn--lg {
+    min-height: 3.5rem;
+    padding: 0 2rem;
+    font-size: 0.9375rem;
+  }
+
+  .btn--block {
+    display: flex;
+    width: 100%;
+  }
+
+  .btn--solid:hover {
+    --btn-bg: var(--c-graphite);
+    --btn-border: var(--c-graphite);
+  }
+
+  .btn--outline {
+    --btn-fg: currentColor;
+    --btn-bg: transparent;
+    --btn-border: currentColor;
+
+    &:hover {
+      --btn-bg: var(--c-ink);
+      --btn-fg: var(--c-white);
+      --btn-border: var(--c-ink);
+    }
+  }
+
+  :global(.theme-dark) .btn--outline:hover {
+    --btn-bg: var(--c-white);
+    --btn-fg: var(--c-ink);
+    --btn-border: var(--c-white);
+  }
+
+  .btn--inverse {
+    --btn-fg: var(--c-ink);
+    --btn-bg: var(--c-white);
+    --btn-border: var(--c-white);
+
+    &:hover {
+      --btn-bg: var(--c-concrete);
+      --btn-border: var(--c-concrete);
+    }
+  }
+
+  .btn--link {
+    min-height: var(--tap);
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    font-stretch: 100%;
+    letter-spacing: 0;
+    text-transform: none;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.35em;
+
+    &:hover {
+      text-decoration-thickness: 2px;
+    }
+  }
+</style>

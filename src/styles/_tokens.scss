@@ -1,0 +1,54 @@
+// Tokens de diseño. Se exponen como variables CSS en :root (global.scss)
+// para poder usarlos en cualquier componente sin recompilar.
+
+// prettier-ignore
+$colors: (
+  'ink': #0a0a0a,        // negro de los polos
+  'graphite': #1f1f1d,   // superficies oscuras
+  'line-dark': #34342f,  // bordes sobre oscuro
+  'stone': #5e5e5a,      // texto secundario sobre claro (5,5:1 sobre paper)
+  'mist': #b5b5b1,       // texto secundario sobre oscuro
+  'line': #c9c9c4,       // bordes sobre claro
+  'smoke': #4f4f4b,      // texto secundario sobre concrete
+  'charcoal': #3f3f3c,   // pies de foto sobre concrete
+  'concrete': #dadad6,   // pared del local / fondo de fotos
+  'paper-dim': #eaeae6,  // hover de filas sobre paper
+  'paper': #f4f4f2,      // fondo base
+  'white': #ffffff,
+  'chrome': #b9bcc0,     // detalles metálicos
+);
+
+$fonts: (
+  'brand': "'Michroma', 'Archivo Variable', system-ui, sans-serif",
+  'base': "'Archivo Variable', system-ui, -apple-system, 'Segoe UI', sans-serif",
+);
+
+// Escala 4-pt
+$space: (
+  '1': 0.25rem,
+  '2': 0.5rem,
+  '3': 0.75rem,
+  '4': 1rem,
+  '5': 1.5rem,
+  '6': 2rem,
+  '7': 3rem,
+  '8': 4rem,
+  '9': 6rem,
+  '10': 8rem,
+);
+
+// prettier-ignore
+$breakpoints: (
+  'sm': 40rem,   // 640
+  'md': 48rem,   // 768
+  'lg': 64rem,   // 1024
+  'xl': 80rem,   // 1280
+);
+
+$container: 78rem;
+$gutter: 1rem;
+$gutter-md: 2rem; // tablet
+$gutter-lg: 2.5rem;
+$header-h: 4rem;
+$tap: 2.75rem; // área táctil mínima (44 px)
+$ease-out: cubic-bezier(0.2, 0.7, 0.1, 1);

@@ -1,0 +1,381 @@
+---
+import { featured, snippets } from '@/data/reviews';
+import { site } from '@/data/site';
+import Button from '@/components/ui/Button.astro';
+import Icon from '@/components/ui/Icon.astro';
+import Stars from '@/components/ui/Stars.astro';
+---
+
+<!-- Citas centradas que rotan con un fundido (una por barbero) y una franja de
+     frases cortas reales que se desliza. Todo va sobre un mismo eje central,
+     igual en escritorio y en móvil.
+     Rotación: cada 7 s; se detiene con el mouse o el foco, fuera de pantalla y
+     si el usuario prefiere menos movimiento (ahí solo cambia con los puntos). -->
+<section class="reviews theme-dark" aria-labelledby="resenas-title">
+  <div class="container top">
+    <h2 id="resenas-title" class="kicker">Reseñas</h2>
+
+    <p class="rating">
+      <Stars size={18} gap={4} />
+      <span class="sr-only">Calificación </span>{site.rating.value}<span class="sr-only"> de 5</span>
+    </p>
+
+    <div class="rotator" data-rotator>
+      <div class="slides">
+        {featured.map((r, i) => (
+          <figure
+            class:list={['slide', { 'is-active': i === 0 }]}
+            data-slide
+            aria-hidden={i === 0 ? undefined : 'true'}
+          >
+            <blockquote lang={r.lang}>
+              <p>“{r.quote}”</p>
+            </blockquote>
+            <figcaption>
+              <span class="author">{r.author}</span>
+              <span class="meta">{r.service} con {r.barber} · {r.date}</span>
+            </figcaption>
+          </figure>
+        ))}
+      </div>
+
+      {featured.length > 1 && (
+        <div class="dots">
+          {featured.map((r, i) => (
+            <button
+              type="button"
+              class:list={['dot', { 'is-active': i === 0 }]}
+              data-dot={i}
+              aria-label={`Ver reseña ${i + 1} de ${featured.length}: ${r.author}`}
+              aria-pressed={i === 0 ? 'true' : 'false'}
+            >
+              <span aria-hidden="true"></span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+
+    <div class="meta-row">
+      <p class="count">{site.rating.count} reseñas en {site.rating.source}</p>
+      <span class="sep-dot" aria-hidden="true">·</span>
+      <Button href={site.reviewsUrl} variant="link">Leer todas las reseñas</Button>
+    </div>
+  </div>
+
+  <div class="marquee" role="region" aria-label={`Lo que dicen los clientes en ${site.rating.source}`}>
+    <div class="track">
+      {[0, 1].map((copy) => (
+        <ul class="list" role="list" aria-hidden={copy === 1 ? 'true' : undefined}>
+          {snippets.map((s) => (
+            <li class="item">
+              <span class="quote" lang={s.lang}>“{s.quote}”</span>
+              <span class="name">{s.author}</span>
+              <span class="sep" aria-hidden="true"><Icon name="star" size={18} /></span>
+            </li>
+          ))}
+        </ul>
+      ))}
+    </div>
+  </div>
+</section>
+
+<script>
+  import { reducedMotion } from '@/lib/motion';
+
+  const INTERVAL = 7000;
+
+  document.querySelectorAll<HTMLElement>('[data-rotator]').forEach((root) => {
+    const slides = [...root.querySelectorAll<HTMLElement>('[data-slide]')];
+    const dots = [...root.querySelectorAll<HTMLButtonElement>('[data-dot]')];
+    if (slides.length < 2) return;
+
+    let index = 0;
+    let timer: number | undefined;
+    let hovered = false;
+    let visible = false;
+
+    const show = (next: number) => {
+      index = (next + slides.length) % slides.length;
+      slides.forEach((s, i) => {
+        const on = i === index;
+        s.classList.toggle('is-active', on);
+        if (on) s.removeAttribute('aria-hidden');
+        else s.setAttribute('aria-hidden', 'true');
+      });
+      dots.forEach((d, i) => {
+        d.classList.toggle('is-active', i === index);
+        d.setAttribute('aria-pressed', String(i === index));
+      });
+    };
+
+    const stop = () => {
+      window.clearInterval(timer);
+      timer = undefined;
+    };
+
+    const start = () => {
+      stop();
+      if (reducedMotion.matches || hovered || !visible || document.hidden) return;
+      timer = window.setInterval(() => show(index + 1), INTERVAL);
+    };
+
+    dots.forEach((d, i) =>
+      d.addEventListener('click', () => {
+        show(i);
+        start(); // reinicia el conteo para que no cambie justo después
+      }),
+    );
+
+    root.addEventListener('mouseenter', () => { hovered = true; stop(); });
+    root.addEventListener('mouseleave', () => { hovered = false; start(); });
+    root.addEventListener('focusin', () => { hovered = true; stop(); });
+    root.addEventListener('focusout', (e) => {
+      if (!root.contains(e.relatedTarget as Node)) { hovered = false; start(); }
+    });
+
+    new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      start();
+    }, { threshold: 0.4 }).observe(root);
+
+    document.addEventListener('visibilitychange', start);
+    reducedMotion.addEventListener('change', start);
+  });
+</script>
+
+<style lang="scss">
+  @use '@/styles/mixins' as *;
+
+  .reviews {
+    padding-top: var(--section-pad);
+  }
+
+  /* Un solo eje central: etiqueta, calificación, cita, autor y enlace */
+  .top {
+    display: grid;
+    justify-items: center;
+    gap: var(--s-5);
+    padding-bottom: var(--s-8);
+    text-align: center;
+  }
+
+  .kicker {
+    @include kicker;
+  }
+
+  .rating {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-3);
+    font-size: 1.0625rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Las citas se apilan en la misma celda: el bloque mide lo que la más alta
+     y la página no salta al cambiar */
+  .rotator {
+    width: 100%;
+    display: grid;
+    justify-items: center;
+    gap: var(--s-5);
+  }
+
+  .slides {
+    width: 100%;
+    display: grid;
+  }
+
+  .slide {
+    grid-area: 1 / 1;
+    margin: 0;
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    gap: var(--s-5);
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity 0.8s var(--ease-out),
+      visibility 0s linear 0.8s;
+  }
+
+  .slide.is-active {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.8s var(--ease-out);
+  }
+
+  blockquote {
+    margin: 0;
+
+    p {
+      max-width: 20ch;
+      margin-inline: auto;
+      font-size: clamp(1.75rem, 1.2rem + 2.2vw, 3.25rem);
+      line-height: 1.1;
+      font-weight: 700;
+      font-stretch: 112%;
+      letter-spacing: -0.015em;
+      text-wrap: balance;
+    }
+  }
+
+  figcaption {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--s-1) var(--s-3);
+    font-size: 0.9375rem;
+  }
+
+  .author {
+    font-weight: 700;
+  }
+
+  .meta {
+    color: var(--muted);
+  }
+
+  /* Puntos: el botón mide 44 px para tocarlo bien; la marca visible es una raya */
+  .dots {
+    display: flex;
+    justify-content: center;
+  }
+
+  .dot {
+    width: var(--tap);
+    height: var(--tap);
+    display: grid;
+    place-items: center;
+    padding: 0;
+    background: none;
+    border: 0;
+    cursor: pointer;
+    color: inherit;
+
+    span {
+      width: 1.5rem;
+      height: 2px;
+      background: var(--c-stone);
+      transition:
+        background-color 0.3s var(--ease-out),
+        width 0.3s var(--ease-out);
+    }
+
+    &.is-active span {
+      width: 2.25rem;
+      background: var(--c-white);
+    }
+
+    &:hover span {
+      background: var(--c-mist);
+    }
+  }
+
+  /* Total de reseñas y enlace en una línea; en móvil se apilan */
+  .meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0 var(--s-3);
+
+    :global(a) {
+      color: var(--c-white);
+    }
+
+    @include down('sm') {
+      flex-direction: column;
+    }
+  }
+
+  .count {
+    font-size: 0.9375rem;
+    font-weight: 600;
+  }
+
+  .sep-dot {
+    color: var(--muted);
+
+    @include down('sm') {
+      display: none;
+    }
+  }
+
+  /* Franja de borde a borde */
+  .marquee {
+    overflow: hidden;
+    padding-block: var(--s-5);
+    border-block: 1px solid var(--rule);
+
+    @include up('md') {
+      padding-block: var(--s-6);
+    }
+  }
+
+  .track {
+    display: flex;
+    width: max-content;
+    animation: marquee 48s linear infinite;
+  }
+
+  .marquee:hover .track {
+    animation-play-state: paused;
+  }
+
+  .list {
+    @include reset-list;
+    display: flex;
+  }
+
+  .item {
+    display: flex;
+    align-items: center;
+    gap: var(--s-3);
+    padding-right: var(--s-6);
+    white-space: nowrap;
+  }
+
+  .quote {
+    font-size: clamp(1.375rem, 1rem + 1.4vw, 2.125rem);
+    font-weight: 700;
+    font-stretch: 125%;
+    text-transform: uppercase;
+    letter-spacing: -0.005em;
+  }
+
+  .name {
+    font-size: 0.8125rem;
+    color: var(--muted);
+  }
+
+  .sep {
+    display: inline-flex;
+    margin-left: var(--s-3);
+    color: var(--c-stone);
+  }
+
+  @keyframes marquee {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  /* Menos movimiento: sin fundido ni franja animada (la franja se recorre con scroll) */
+  @media (prefers-reduced-motion: reduce) {
+    .slide,
+    .slide.is-active {
+      transition: none;
+    }
+
+    .track {
+      animation: none;
+    }
+
+    .marquee {
+      overflow-x: auto;
+    }
+  }
+</style>

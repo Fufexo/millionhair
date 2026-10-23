@@ -1,0 +1,186 @@
+---
+import { featuredService as experience } from '@/data/services';
+import { formatDuration, formatPrice } from '@/lib/format';
+import SectionHeader from '@/components/ui/SectionHeader.astro';
+import Button from '@/components/ui/Button.astro';
+import LoopVideo from '@/components/ui/LoopVideo.astro';
+---
+
+<!--
+  Escenario partido, en espejo del hero:
+  - Móvil: el video de Kaleb ocupa la pantalla de borde a borde y el título
+    entra sobre su parte baja, que se funde con el negro de la sección.
+  - Escritorio: el video llena la mitad izquierda de borde a borde y se funde
+    hacia el texto, que va en la mitad derecha.
+-->
+<section id="experience" class="experience theme-dark" aria-labelledby="experience-title">
+  <div class="stage">
+    <div class="media">
+      <LoopVideo src="/video/experience" poster="/video/experience-poster.jpg" />
+      <div class="scrim" aria-hidden="true"></div>
+    </div>
+
+    <div class="body">
+      <SectionHeader kicker="La experiencia" title="Millionhair Experience" id="experience-title" />
+      <p class="lede">
+        Asesoría, corte, limpieza facial y productos de calidad. Una hora pensada de principio a fin, con
+        Kaleb.
+      </p>
+      <dl class="spec">
+        <div>
+          <dt>Servicio</dt>
+          <dd>{experience.name}</dd>
+        </div>
+        <div>
+          <dt>Duración</dt>
+          <dd>{formatDuration(experience.duration)}</dd>
+        </div>
+        <div>
+          <dt>Precio</dt>
+          <dd>{formatPrice(experience.price)}</dd>
+        </div>
+      </dl>
+      <Button href={experience.bookingUrl} variant="inverse" size="lg" class="cta" data-book>
+        Reservar la experiencia
+      </Button>
+    </div>
+  </div>
+</section>
+
+<style lang="scss">
+  @use '@/styles/tokens' as *;
+  @use '@/styles/mixins' as *;
+
+  .experience {
+    padding-bottom: var(--section-pad);
+    overflow: hidden;
+
+    @include up('lg') {
+      padding-bottom: 0;
+    }
+  }
+
+  .stage {
+    display: grid;
+
+    @include up('lg') {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      min-height: min(100svh, 56rem);
+    }
+  }
+
+  /* ---- Video: de borde a borde ---- */
+  .media {
+    position: relative;
+    height: min(88svh, 44rem);
+    overflow: hidden;
+
+    @include up('md') {
+      height: min(80svh, 42.5rem);
+    }
+
+    :global(video) {
+      @include mono;
+      object-position: center 30%;
+    }
+
+    @include up('lg') {
+      height: auto;
+
+      /* El video no define la altura: la marca la pantalla (stage) */
+      :global(video) {
+        position: absolute;
+        inset: 0;
+      }
+    }
+  }
+
+  .scrim {
+    position: absolute;
+    inset: 0;
+    /* Móvil: se funde hacia abajo con el negro, donde entra el título */
+    background: linear-gradient(180deg, ink(0.35) 0%, ink(0) 18%, ink(0) 50%, ink(0.85) 84%, var(--c-ink) 100%);
+
+    @include up('lg') {
+      /* Escritorio: se funde hacia la derecha, contra la columna de texto */
+      background:
+        linear-gradient(90deg, ink(0) 55%, ink(0.7) 85%, var(--c-ink) 100%),
+        linear-gradient(180deg, ink(0.25) 0%, ink(0) 20%, ink(0) 80%, ink(0.35) 100%);
+    }
+  }
+
+  /* ---- Texto ---- */
+  .body {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    gap: var(--s-6);
+    justify-items: start;
+    align-content: start;
+    width: 100%;
+    max-width: $container;
+    margin-inline: auto;
+    padding-inline: $gutter;
+    /* El título sube y se apoya sobre la parte baja del video */
+    margin-top: calc(var(--s-10) * -1);
+
+    @include up('md') {
+      max-width: 40rem;
+      margin-inline: 0;
+      padding-inline: $gutter-md;
+    }
+
+    @include up('lg') {
+      align-content: center;
+      max-width: none;
+      margin: 0;
+      padding-block: var(--section-pad);
+      padding-left: var(--s-8);
+      /* % = ancho de la columna (la mitad de la página): así el borde derecho
+         coincide con el del contenedor, sin depender de la barra de scroll */
+      padding-right: max(#{$gutter-lg}, calc(100% - #{$container * 0.5} + #{$gutter-lg}));
+    }
+  }
+
+  .lede {
+    max-width: 38ch;
+    font-size: 1.0625rem;
+    color: var(--c-concrete);
+
+    @include up('lg') {
+      font-size: 1.25rem;
+    }
+  }
+
+  .spec {
+    width: 100%;
+    max-width: 32rem;
+    margin: 0;
+    border-top: 1px solid var(--rule);
+
+    div {
+      display: flex;
+      justify-content: space-between;
+      gap: var(--s-4);
+      padding-block: var(--s-4);
+      border-bottom: 1px solid var(--rule);
+    }
+
+    dt {
+      color: var(--muted);
+    }
+
+    dd {
+      margin: 0;
+      font-weight: 600;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+  }
+
+  .body :global(.cta) {
+    @include down('sm') {
+      width: 100%;
+    }
+  }
+</style>

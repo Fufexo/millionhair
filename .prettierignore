@@ -1,0 +1,9 @@
+dist/
+.astro/
+node_modules/
+package-lock.json
+public/
+
+# Los .astro se formatean a mano: prettier-plugin-astro parte el texto en línea
+# y agrega espacios dentro de elementos inline (cambia el render).
+*.astro

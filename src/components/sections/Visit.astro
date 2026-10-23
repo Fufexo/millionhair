@@ -1,0 +1,196 @@
+---
+import { site } from '@/data/site';
+import SectionHeader from '@/components/ui/SectionHeader.astro';
+import Button from '@/components/ui/Button.astro';
+import Icon from '@/components/ui/Icon.astro';
+import LoopVideo from '@/components/ui/LoopVideo.astro';
+import OpenStatus from '@/components/ui/OpenStatus.astro';
+
+// Pin en las coordenadas exactas de la ficha de Google Maps
+const mapEmbed = `https://maps.google.com/maps?q=${site.geo.lat},${site.geo.lng}&z=17&hl=es&output=embed`;
+---
+
+<section id="visitanos" class="visit theme-light" aria-labelledby="visitanos-title">
+  <div class="container grid">
+    <div class="media">
+      <LoopVideo
+        src="/video/place"
+        poster="/video/place-poster.jpg"
+        label={`El local de ${site.name}: las luces del techo, una silla de barbero y la entrada en ${site.address.street}`}
+      />
+    </div>
+
+    <div class="body">
+      <SectionHeader
+        kicker={`Visítanos · ${site.address.district}`}
+        title={site.address.street.replace(/ (\d+)$/, '\u00a0$1')}
+        id="visitanos-title"
+      />
+
+      <p class="status">
+        <Icon name="clock" />
+        <OpenStatus />
+      </p>
+
+      <table class="hours">
+        <caption class="sr-only">Horario de atención</caption>
+        <tbody>
+          {site.hours.map((h) => (
+            <tr class:list={{ closed: !h.opens }}>
+              <th scope="row">{h.label}</th>
+              <td>{h.opens ? `${h.opens} – ${h.closes}` : 'Cerrado'}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {site.parking && (
+        <p class="feature">
+          <Icon name="parking" /> Estacionamiento disponible
+        </p>
+      )}
+
+      <!-- Mapa de Google: el iframe carga solo al acercarse (loading="lazy") -->
+      <div class="map">
+        <iframe
+          src={mapEmbed}
+          title={`Mapa: ${site.name}, ${site.address.street}, ${site.address.district}`}
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+        ></iframe>
+      </div>
+
+      <div class="ctas">
+        <Button href={site.mapsUrl} variant="outline" external>
+          <Icon name="pin" size={18} /> Cómo llegar
+        </Button>
+        <Button href={site.bookingUrl} data-book>Reservar cita</Button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style lang="scss">
+  @use '@/styles/mixins' as *;
+
+  .visit {
+    padding-block: var(--section-pad);
+  }
+
+  .grid {
+    display: grid;
+    gap: var(--s-6);
+
+    /* La columna del video mide lo que el video; el texto toma el resto */
+    @include up('md') {
+      grid-template-columns: minmax(0, 17.5rem) minmax(0, 1fr);
+      gap: var(--s-7);
+      align-items: center;
+    }
+
+    @include up('lg') {
+      grid-template-columns: minmax(0, 26rem) minmax(0, 1fr);
+      gap: var(--s-9);
+    }
+  }
+
+  /* Video vertical con tres tomas apiladas de bordes redondeados, sin caja ni
+     fondo: se ven tres tarjetas redondeadas sueltas. */
+  .media {
+    width: min(100%, 24rem);
+    aspect-ratio: 518 / 920;
+    justify-self: center;
+
+    @include up('md') {
+      width: 100%;
+      justify-self: start;
+    }
+
+    /* La máscara deja ver solo las tres tomas redondeadas: lo de alrededor y
+       entre ellas queda transparente y se ve el fondo real de la página */
+    :global(video) {
+      background: transparent;
+      @include mono;
+      -webkit-mask: url('/video/place-mask.svg') center / 100% 100% no-repeat;
+      mask: url('/video/place-mask.svg') center / 100% 100% no-repeat;
+    }
+  }
+
+  .body {
+    display: grid;
+    gap: var(--s-5);
+    align-content: start;
+  }
+
+  .status {
+    display: flex;
+    align-items: center;
+    gap: var(--s-2);
+    font-weight: 600;
+  }
+
+  .hours {
+    width: 100%;
+    border-collapse: collapse;
+    border-top: 1px solid var(--c-ink);
+    font-variant-numeric: tabular-nums;
+
+    th,
+    td {
+      padding: var(--s-3) 0;
+      border-bottom: 1px solid var(--rule);
+      font-weight: 400;
+      text-align: left;
+    }
+
+    td {
+      text-align: right;
+      font-weight: 600;
+    }
+
+    .closed th,
+    .closed td {
+      color: var(--muted);
+      font-weight: 400;
+    }
+  }
+
+  .map {
+    height: 12.5rem;
+    overflow: hidden;
+    background: var(--c-concrete);
+
+    iframe {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      @include mono;
+    }
+  }
+
+  .feature {
+    display: flex;
+    align-items: center;
+    gap: var(--s-2);
+  }
+
+  .ctas {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--s-2);
+
+    @include up('sm') {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--s-3);
+    }
+
+    :global(.btn) {
+      padding-inline: var(--s-3);
+      @include up('sm') {
+        padding-inline: 1.5rem;
+      }
+    }
+  }
+</style>

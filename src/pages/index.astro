@@ -1,0 +1,28 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Header from '@/components/layout/Header.astro';
+import Footer from '@/components/layout/Footer.astro';
+import StickyBooking from '@/components/layout/StickyBooking.astro';
+import Hero from '@/components/sections/Hero.astro';
+import Services from '@/components/sections/Services.astro';
+import Experience from '@/components/sections/Experience.astro';
+import Team from '@/components/sections/Team.astro';
+import Lookbook from '@/components/sections/Lookbook.astro';
+import Reviews from '@/components/sections/Reviews.astro';
+import Visit from '@/components/sections/Visit.astro';
+---
+
+<BaseLayout>
+  <Header />
+  <main id="contenido">
+    <Hero />
+    <Services />
+    <Experience />
+    <Team />
+    <Lookbook />
+    <Reviews />
+    <Visit />
+  </main>
+  <Footer />
+  <StickyBooking />
+</BaseLayout>

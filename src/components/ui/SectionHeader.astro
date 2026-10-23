@@ -1,0 +1,35 @@
+---
+interface Props {
+  kicker?: string;
+  title: string;
+  id?: string;
+  class?: string;
+}
+const { kicker, title, id, class: className } = Astro.props;
+---
+
+<header class:list={['section-header', className]}>
+  {kicker && <p class="kicker">{kicker}</p>}
+  <h2 id={id} class="title">{title}</h2>
+  <slot />
+</header>
+
+<style lang="scss">
+  @use '@/styles/mixins' as *;
+
+  .section-header {
+    display: grid;
+    gap: var(--s-3);
+    width: 100%;
+    container-type: inline-size;
+  }
+
+  .kicker {
+    @include kicker;
+  }
+
+  .title {
+    /* "EXPERIENCE" / "MIRAFLORES" son las palabras más largas: ~8,6 em */
+    @include display(md, $fit: 11cqi);
+  }
+</style>
