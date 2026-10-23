@@ -8,6 +8,9 @@ node_modules/
 # logs
 npm-debug.log*
 
+# vercel
+.vercel/
+
 # env
 .env
 .env.*
